@@ -12,6 +12,9 @@ authorization master( global )
   field ( readonly )
    LoanNo,
    TotalAmount,
+//   BalanceAmount,
+//   BankName,
+//   EmployeeName,
    CreatedBy,
    CreatedAt,
    LastChangedBy,
@@ -21,11 +24,12 @@ authorization master( global )
   field ( readonly : update )
   CompCode;
 
-  create;
   update;
   delete;
-
   determination changeValues on modify { field LoanAmount; }
+
+  create ( precheck );
+
 
   mapping for ZLOANMASTER
   {

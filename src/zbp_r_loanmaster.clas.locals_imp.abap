@@ -11,6 +11,9 @@ CLASS LHC_ZR_LOANMASTER DEFINITION INHERITING FROM CL_ABAP_BEHAVIOR_HANDLER.
 
     METHODS earlynumbering_loanmaster FOR NUMBERING
       IMPORTING entities FOR CREATE ZrLoanmaster.
+
+      METHODS precheck_create FOR PRECHECK
+      IMPORTING entities FOR CREATE  ZrLoanmaster.
 ENDCLASS.
 
 CLASS LHC_ZR_LOANMASTER IMPLEMENTATION.
@@ -19,13 +22,24 @@ CLASS LHC_ZR_LOANMASTER IMPLEMENTATION.
 
     METHOD changeValues.
 
-        READ ENTITIES OF zr_loanmaster IN LOCAL MODE
-          ENTITY ZrLoanmaster
-          FIELDS ( LoanAmount InterestAmount )
-          WITH CORRESPONDING #( keys )
-          RESULT DATA(advlicenses).
+      READ ENTITIES OF zr_loanmaster IN LOCAL MODE
+        ENTITY ZrLoanmaster
+        FIELDS ( LoanAmount InterestAmount LoanType )
+        WITH CORRESPONDING #( keys )
+        RESULT DATA(advlicenses).
 
-        loop at advlicenses INTO DATA(exportline).
+      LOOP AT advlicenses INTO DATA(exportline).
+
+        IF exportline-LoanType = 'ADVANCE'.
+          MODIFY ENTITIES OF zr_loanmaster IN LOCAL MODE
+         ENTITY ZrLoanmaster
+         UPDATE
+         FIELDS ( BalanceAmount TotalAmount EMICount ) WITH VALUE #( ( %tky = exportline-%tky
+                       EMICount = 1
+                       BalanceAmount = exportline-InterestAmount + exportline-LoanAmount
+                       TotalAmount = exportline-InterestAmount + exportline-LoanAmount
+                       ) ).
+        ELSE.
           MODIFY ENTITIES OF zr_loanmaster IN LOCAL MODE
             ENTITY ZrLoanmaster
             UPDATE
@@ -33,9 +47,10 @@ CLASS LHC_ZR_LOANMASTER IMPLEMENTATION.
                           BalanceAmount = exportline-InterestAmount + exportline-LoanAmount
                           TotalAmount = exportline-InterestAmount + exportline-LoanAmount
                           ) ).
+        ENDIF.
 
-        ENDLOOP.
-  ENDMETHOD.
+      ENDLOOP.
+    ENDMETHOD.
 
   METHOD earlynumbering_loanmaster.
 
@@ -74,5 +89,46 @@ CLASS LHC_ZR_LOANMASTER IMPLEMENTATION.
 
 
   ENDMETHOD.
+
+  METHOD precheck_create.
+
+    LOOP AT entities ASSIGNING FIELD-SYMBOL(<loan>).
+
+        SELECT SINGLE FROM zr_loantype
+        FIELDS ( Value )
+        WHERE Value = @<loan>-LoanType
+        INTO @DATA(LoanType).
+
+        IF LOANTYPE IS INITIAL.
+          APPEND VALUE #( %msg = new_message_with_text(
+                            severity = if_abap_behv_message=>severity-error
+                            text = 'Loan Type is not valid.' )
+                            ) to reported-zrloanmaster.
+        ENDIF.
+
+        SELECT SINGLE FROM zr_paymentmode
+        FIELDS ( Value )
+        WHERE Value = @<loan>-PaymentMode
+        INTO @DATA(PaymentMode).
+
+        IF PaymentMode IS INITIAL.
+          APPEND VALUE #( %msg = new_message_with_text(
+                            severity = if_abap_behv_message=>severity-error
+                            text = 'Payment Mode is not valid.' )
+                            ) to reported-zrloanmaster.
+        ENDIF.
+
+
+
+        IF <loan>-EMICount = 0 .
+        APPEND VALUE #( %msg = new_message_with_text(
+                          severity = if_abap_behv_message=>severity-error
+                          text = 'EMI Count cannot be 0.' )
+                          ) to reported-zrloanmaster.
+        ENDIF.
+
+    ENDLOOP.
+
+   ENDMETHOD.
 
 ENDCLASS.

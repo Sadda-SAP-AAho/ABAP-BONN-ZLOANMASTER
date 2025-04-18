@@ -107,49 +107,53 @@ annotate view ZC_LOANMASTER with
   LoanType;
   
   
-  @EndUserText.label: 'EMI Count'
-  @UI.identification: [ {
-    position: 80 , 
-    label: 'EMI Count'
-  } ]
-  @UI.lineItem: [ {
-    position: 80 , 
-    label: 'EMI Count'
-  } ]
-  EMICount;
+
   
   @EndUserText.label: 'Loan Amount'
   @UI.identification: [ {
-    position: 90 , 
+    position: 80 , 
     label: 'Loan Amount'
   } ]
   @UI.lineItem: [ {
-    position: 90 , 
+    position: 80 , 
     label: 'Loan Amount'
   } ]
   LoanAmount;
   
-  @EndUserText.label: 'Deducted From'
+    @EndUserText.label: 'Interest Amount'
+  @UI.identification: [ {
+    position: 90 , 
+    label: 'Interest Amount'
+  } ]
+  @UI.lineItem: [ {
+    position: 90 , 
+    label: 'Interest Amount'
+  } ]
+  InterestAmount;
+  
+    @EndUserText.label: 'EMI Count'
   @UI.identification: [ {
     position: 100 , 
-    label: 'Deducted From'
+    label: 'EMI Count'
   } ]
   @UI.lineItem: [ {
     position: 100 , 
+    label: 'EMI Count'
+  } ]
+  EMICount;
+  
+  @EndUserText.label: 'Deducted From'
+  @UI.identification: [ {
+    position: 110 , 
+    label: 'Deducted From'
+  } ]
+  @UI.lineItem: [ {
+    position: 110 , 
     label: 'Deducted From'
   } ]
   DeductedFrom;
   
-  @EndUserText.label: 'Interest Amount'
-  @UI.identification: [ {
-    position: 110 , 
-    label: 'Interest Amount'
-  } ]
-  @UI.lineItem: [ {
-    position: 110 , 
-    label: 'Interest Amount'
-  } ]
-  InterestAmount;
+
   
   @EndUserText.label: 'Total Amount'
   @UI.identification: [ {
