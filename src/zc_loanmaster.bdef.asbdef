@@ -8,6 +8,5 @@ use etag
   use update;
   use delete;
 
-  use action Approve;
 
 }
